@@ -6,7 +6,7 @@
 .page-content h1{font-size:44px;line-height:1.125;font-weight:400;margin:0 0 20px}
 .page-content p{font-size:20px;line-height:1.5;color:#404040;margin:0}
 .page-shell .page-footer{margin-top:0;min-height:0}
-.page-shell .footer-content{padding:48px var(--gutter) 40px;justify-content:flex-end}
+.page-shell .footer-content{padding:48px var(--gutter) 40px;justify-content:flex-start}
 @media(max-width:600px){
  .page-content{padding-top:calc(var(--header-height) + 48px);padding-bottom:64px}
  .page-content h1{font-size:32px}
