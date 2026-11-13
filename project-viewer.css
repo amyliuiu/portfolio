@@ -1,6 +1,7 @@
 /* Selected Figma designs: desktop 168:3613; mobile 168:3876. */
 .project-preview{position:relative}
 .project-preview figcaption{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.project-headline{min-width:0;transform-origin:left center}
 .project-preview:not(.viewer-ready) .project-expand{display:none}
 .project-expand{opacity:0;transition:opacity 220ms ease-out;flex:none}
 .project-open{position:absolute;inset:0;width:100%;height:100%;border-radius:4px}
@@ -11,6 +12,9 @@
 @media(min-width:701px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
  .project-preview.viewer-ready{transform-origin:center;transition:transform 220ms cubic-bezier(.2,.65,.3,1)}
  .project-preview.viewer-ready:hover{transform:scale(1.015);z-index:1}
+ /* Preserve the headline’s visual size while it travels with the growing card. */
+ .project-headline{transition:transform 220ms cubic-bezier(.2,.65,.3,1)}
+ .project-preview.viewer-ready:hover .project-headline{transform:scale(calc(1 / 1.015))}
 }
 .discount-hero{position:relative;background:#f4f4f4}
 .discount-hero>.discount-animation{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center top}

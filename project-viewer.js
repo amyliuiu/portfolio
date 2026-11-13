@@ -9,6 +9,8 @@
  const projects=[...document.querySelectorAll('.work .project-image')].map((card,index)=>{
   const figure=card.closest('figure'),caption=figure.querySelector('figcaption'),name=caption.textContent.trim();
   figure.classList.add('project-preview','viewer-ready');
+  const headline=document.createElement('span');headline.className='project-headline';
+  [...caption.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).forEach(n=>headline.append(n));caption.prepend(headline);
   if(!caption.querySelector('.project-expand'))caption.append(expand.cloneNode(true));
   let trigger=figure.querySelector('.project-open');
   if(!trigger){trigger=document.createElement('button');trigger.type='button';trigger.className='project-open';figure.append(trigger);}
@@ -24,7 +26,7 @@
  dialog.dataset.input='keyboard';
  document.addEventListener('pointerdown',()=>{dialog.dataset.input='pointer';},{capture:true,passive:true});
  document.addEventListener('keydown',e=>{
-  if(!e.metaKey&&!e.ctrlKey&&!e.altKey&&!['ArrowLeft','ArrowRight','Escape'].includes(e.key)){
+  if(!e.metaKey&&!e.ctrlKey&&!e.altKey&&!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Escape'].includes(e.key)){
    dialog.dataset.input='keyboard';projects.forEach(p=>delete p.trigger.dataset.restoredPointerFocus);
   }
  },true);
