@@ -31,12 +31,12 @@
       if(reduced.matches||document.hidden||scrollY>0){settleLanding();return;}
       // Name is part of the hero copy; social/navigation links are a second beat.
       // Docked headers are excluded, and scrolling cancels both stages at once.
-      fadeLandingGroup('.intro>p,body:not(.is-docked)>.brand','revealing','landing-pending',run,()=>{
+      fadeLandingGroup('.intro>p,.home-page:not(.is-docked) .brand','revealing','landing-pending',run,()=>{
         root.dataset.landingReveal='waiting-links';
         revealTimer=setTimeout(()=>{
           if(run!==revealRun)return;
           if(reduced.matches||document.hidden||scrollY>0){settleLanding();return;}
-          const links=mobileNav.matches?'.intro-meta':'.intro-meta,body:not(.is-docked)>.primary-nav';
+          const links=mobileNav.matches?'.intro-meta':'.intro-meta,.home-page:not(.is-docked) .primary-nav';
           fadeLandingGroup(links,'revealing-links','landing-links-pending',run,settleLanding);
         },220);
       });

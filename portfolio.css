@@ -4,8 +4,15 @@
 /* Static Henry Regular has no lighter weight axis. A hairline paper-colored
    stroke optically thins the hero without changing its fill, metrics or spacing. */
 .intro>p,.brand{-webkit-text-stroke:var(--hero-optical-stroke) var(--paper)}.brand{-webkit-text-stroke-width:calc(var(--hero-optical-stroke) * var(--hero-opacity))}
+.home-page{position:relative}
 .home-page .brand{will-change:transform}
-.brand,.primary-nav{position:fixed;z-index:30;line-height:1.125;top:var(--initial-brand-top,calc(100svh - 242px))}.brand{left:var(--gutter);font-size:var(--intro-size);white-space:nowrap;transform-origin:0 0}.primary-nav{right:var(--gutter);top:calc(100svh - 56px);display:flex;align-items:center;gap:56px;font-size:var(--nav-size);line-height:24px;color:#404040}.primary-nav a{position:relative;display:inline-flex;align-items:center;white-space:nowrap}.primary-nav img{position:absolute;right:calc(100% + var(--marker-gap,4px));top:50%;display:block;width:12px;height:12px;object-fit:contain;transform:translateY(calc(-50% + var(--marker-shift,0px)))}.header-surface{position:fixed;z-index:20;inset:0 0 auto;height:80px;background:#fff;visibility:hidden}.is-docked .header-surface{visibility:visible}.is-docked .brand{color:#404040}
+.desktop-chrome-track{position:absolute;bottom:0;width:max-content;z-index:30;pointer-events:none}
+.brand-track{left:var(--gutter)}.nav-track{right:calc(var(--gutter) + var(--viewer-scrollbar,0px))}
+.desktop-chrome-track>.brand,.desktop-chrome-track>.primary-nav{position:sticky;left:auto;right:auto;pointer-events:auto}
+.desktop-chrome-track>.brand{display:block}
+/* Root still locks scrolling; body must not become a new sticky scroll container. */
+html.viewer-open .home-page{overflow:clip!important}
+.brand,.primary-nav{position:fixed;z-index:30;line-height:1.125;top:var(--initial-brand-top,calc(100svh - 242px))}.brand{left:var(--gutter);font-size:var(--intro-size);white-space:nowrap;transform-origin:0 0}.primary-nav{right:var(--gutter);top:calc(100svh - 56px);display:flex;align-items:center;gap:56px;font-size:var(--nav-size);line-height:24px;color:#404040}.primary-nav a{position:relative;display:inline-flex;align-items:center;white-space:nowrap}.nav-marker{position:absolute;right:calc(100% + var(--marker-gap,4px));top:50%;width:12px;height:12px;transform:translateY(calc(-50% + var(--marker-shift,0px)))}.primary-nav img{position:absolute;inset:0;display:block;width:12px;height:12px;object-fit:contain}.header-surface{position:fixed;z-index:20;inset:0 0 auto;height:80px;background:#fff;visibility:hidden}.is-docked .header-surface{visibility:visible}.is-docked .brand{color:#404040}
 .work{padding:24px var(--gutter) 0;scroll-margin-top:0}.project-row{display:grid;gap:16px;align-items:start}.project-row.three{grid-template-columns:repeat(3,minmax(0,1fr))}.project-row.two{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:32px}figure{margin:0;min-width:0}.project-image{background:#f4f4f4;width:100%;display:grid;place-items:center;overflow:hidden;border-radius:4px}.project-image>span{font:12px/1.4 system-ui,sans-serif;letter-spacing:.02em;color:#aaa}.project-image img,.project-image video{width:100%;height:100%;object-fit:contain;display:block;border-radius:4px}.portrait{aspect-ratio:11/12}.landscape{aspect-ratio:4/3}.creation{aspect-ratio:1.618}.tv{aspect-ratio:16/9}figcaption{font-size:20px;line-height:1.25;color:#404040;margin-top:16px}
 .page-footer{position:relative;isolation:isolate;margin-top:128px;min-height:max(540px,var(--footer-art-height,540px));overflow:hidden}.footer-art{position:absolute;bottom:0;left:0;width:100%;height:var(--footer-art-height,540px);z-index:-1;pointer-events:none}.footer-art svg,.footer-art canvas{position:absolute;bottom:0;left:0}.footer-art svg,.footer-art .footer-motion{transform:scaleY(-1);transform-origin:center}.footer-content{display:flex;justify-content:space-between;gap:40px;padding:160px var(--gutter) 100px;color:#404040}.thanks{font-size:24px;line-height:1.2;margin:0}.footer-links{display:flex;gap:72px}.footer-links>div{display:flex;flex-direction:column;gap:12px;font-size:20px;line-height:1.05}.footer-links h2{font:italic 20px/1.05 Henry,Georgia,serif;color:#707070;margin:0}.footer-links a{display:flex;gap:8px;align-items:center}
 @media(min-width:1800px){:root{--gutter:64px}}@media(max-width:1000px){:root{--gutter:28px;--nav-size:18px}.primary-nav{gap:32px}.landing{min-height:680px}.intro>p{font-size:clamp(28px,3.8vw,38px)}figcaption{font-size:18px}.footer-links{gap:40px}}
@@ -17,20 +24,20 @@
 /* Page content and the active marker share one entrance clock. Shared name,
    nav labels and footer remain opaque; the plaid arrival is unchanged. */
 @keyframes page-enter{from{opacity:0}to{opacity:1}}
-/* Filter opacity composes with Work's scroll-driven opacity instead of
-   overriding it, so the marker stays absent on landing and reverses on scroll. */
-@keyframes nav-marker-enter{from{filter:opacity(0)}to{filter:opacity(1)}}
+/* Animate the wrapper, not a filter on the SVG: avoids WebKit black textures.
+   The image retains its independent Work scroll opacity. */
+@keyframes nav-marker-enter{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:no-preference){
  .work,.page-content{animation:page-enter var(--page-fade-duration) var(--page-fade-easing) both}
- .primary-nav img{animation:nav-marker-enter var(--page-fade-duration) var(--page-fade-easing) both}
+ .nav-marker{animation:nav-marker-enter var(--page-fade-duration) var(--page-fade-easing) both}
  /* Landing-only sequencing is released by the actual plaid completion,
     not a guessed delay from page load. Shared docked chrome stays visible. */
  html.landing-pending .intro>p,
- html.landing-pending body:not(.is-docked)>.brand,
+ html.landing-pending .home-page:not(.is-docked) .brand,
  html.landing-links-pending .intro-meta{opacity:0;visibility:hidden}
 }
 @media(prefers-reduced-motion:no-preference) and (min-width:601px){
- html.landing-links-pending body:not(.is-docked)>.primary-nav{opacity:0;visibility:hidden}
+ html.landing-links-pending .home-page:not(.is-docked) .primary-nav{opacity:0;visibility:hidden}
 }
 /* Hover is transient, never tied to aria-current, :active or :visited.
    Restrict to hover-capable pointers so a touch tap cannot leave a sticky color. */
