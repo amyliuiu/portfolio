@@ -10,8 +10,8 @@ This repository contains only the website and its shipped assets. Original recor
 
 ## Work in progress
 
-- Discounts has the first working project viewer; other project viewers and project switching are pending.
-- Some copy, Play content, and About imagery are unfinished.
+- All seven projects open in the viewer, with desktop buttons/arrow keys and mobile swipes. Navigation stops at the ends.
+- Project dates and captions are intentionally blank. Play content and About imagery are unfinished.
 - Replace trial font assets with appropriately licensed webfonts.
 - The custom domain has not been connected yet.
 
