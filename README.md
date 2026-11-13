@@ -15,4 +15,6 @@ This repository contains only the website and its shipped assets. Original recor
 - Replace trial font assets with appropriately licensed webfonts.
 - The custom domain has not been connected yet.
 
-Code and assets are not offered under an open-source or redistribution license.
+EB Garamond paragraph fonts are distributed under the SIL Open Font License 1.1; the complete copyright and license notice is included in `body-type.css`. Henry Trial remains a separate, unresolved webfont licensing item.
+
+Except for those explicitly licensed third-party fonts, code and assets are not offered under an open-source or redistribution license.

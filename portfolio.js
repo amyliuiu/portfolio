@@ -12,14 +12,15 @@
  const chromeTracks=new Map();
  function placeChrome(node,top,kind){
   let track=chromeTracks.get(node);
-  if(mobileNav.matches){if(track){track.replaceWith(node);chromeTracks.delete(node);}return;}
+  if(mobileNav.matches&&kind==='brand-track'){if(track){track.replaceWith(node);chromeTracks.delete(node);}return;}
   if(!track){track=document.createElement('div');track.className='desktop-chrome-track '+kind;node.before(track);track.append(node);chromeTracks.set(node,track);}
   track.style.top=top+'px';
  }
  function brandTransform(y){
   const p=ease(y/Math.max(1,nameTop-28)),scale=(startSize+(navSize-startSize)*p)/startSize;
   const line=startLine+(24-startLine)*p,baselineOffset=(line-startLine*scale)/2;
-  // Desktop translation is native sticky positioning, including older Safari.
+  // Brand: desktop uses sticky positioning; mobile retains its native scroll timeline.
+  // Navigation uses sticky positioning at every width, starting beside the social links.
   return `translate3d(0,${(mobileNav.matches?Math.max(28,nameTop-y):0)+baselineOffset}px,0) scale(${scale})`;
  }
  function configureBrandMotion(){

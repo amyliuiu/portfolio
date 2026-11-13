@@ -36,7 +36,7 @@
         revealTimer=setTimeout(()=>{
           if(run!==revealRun)return;
           if(reduced.matches||document.hidden||scrollY>0){settleLanding();return;}
-          const links=mobileNav.matches?'.intro-meta':'.intro-meta,.home-page:not(.is-docked) .primary-nav';
+          const links='.intro-meta,.home-page:not(.is-docked) .primary-nav';
           fadeLandingGroup(links,'revealing-links','landing-links-pending',run,settleLanding);
         },220);
       });
