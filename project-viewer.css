@@ -61,6 +61,8 @@ html.viewer-open .primary-nav{right:calc(var(--gutter) + var(--viewer-scrollbar,
  .carousel-page{position:absolute;inset:0;overflow:hidden;background:#fff;will-change:transform}
  .carousel-gallery{height:auto!important;overflow:visible!important;min-height:0}
  .project-viewer[data-carousel] .viewer-details::before{content:"";position:absolute;inset:calc(-24px - env(safe-area-inset-top,0px)) 0 -24px;background:#fff;z-index:-1}
+ .viewer-gallery video{pointer-events:none}
+ .viewer-gallery .phone-screen{position:relative}
  .viewer-gallery{overflow:visible;padding:0 12px calc(12px + env(safe-area-inset-bottom,0px));min-height:auto;flex:none}
  .viewer-hero{aspect-ratio:1}
  .viewer-recording{aspect-ratio:auto;padding:24px 0;--mockup-width:70}

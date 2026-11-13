@@ -25,7 +25,7 @@
  document.addEventListener('keydown',e=>{if(!e.metaKey&&!e.ctrlKey&&!e.altKey)dialog.dataset.input='keyboard';},true);
  const notify=()=>document.dispatchEvent(new Event('project-viewer:change'));
  function setPhase(value){phase=value;dialog.dataset.phase=value;notify();}
- function stopMotion(){animations.forEach(a=>a.cancel());animations=[];flight?.remove();flight=null;carousel?.destroy();carousel=null;if(hero)hero.style.visibility='';}
+ function stopMotion(){animations.forEach(a=>a.cancel());animations=[];flight?.remove();flight=null;carousel?.destroy();carousel=null;title.style.opacity='';if(hero)hero.style.visibility='';}
  function animate(node,frames,duration=360){const a=node.animate(frames,{duration,easing:'ease-in-out',fill:'both'});animations.push(a);return a.finished.catch(()=>{});}
  function announce(){announcement.textContent=projects[index].name+', project '+(index+1)+' of '+projects.length;}
  function makeMedia(selected){
@@ -41,9 +41,9 @@
   }
   return media;
  }
- function render(selected){
+ function render(selected,keepMedia=false){
   index=selected;const project=projects[index];
-  gallery.replaceChildren(...makeMedia(selected));hero=gallery.firstElementChild;
+  if(!keepMedia)gallery.replaceChildren(...makeMedia(selected));hero=gallery.firstElementChild;
   title.textContent=project.name;dialog.dataset.project=project.id;gallery.setAttribute('aria-label',project.name+' media');
   gallery.scrollTop=panel.scrollTop=0;dialog.querySelector('.viewer-copy').scrollTop=0;
   previous.disabled=index===0;next.disabled=index===projects.length-1;
@@ -123,16 +123,19 @@
    if(token!==run)return;
   }
   const text=commit?(async()=>{
-   await animate(title,[{opacity:1},{opacity:0}],100);if(token!==run)return;
+   const fadeOut=title.animate([{opacity:1},{opacity:0}],{duration:160,easing:'ease-out',fill:'forwards'});animations.push(fadeOut);
+   await fadeOut.finished.catch(()=>{});if(token!==run)return;
+   // Persist zero opacity before replacing text; retire the old animation entirely.
+   title.style.opacity='0';fadeOut.cancel();
    title.textContent=projects[current.target].name;panel.scrollTop=0;
-   await animate(title,[{opacity:0},{opacity:1}],180);
+   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));if(token!==run)return;
+   const fadeIn=title.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-in',fill:'forwards'});animations.push(fadeIn);
+   await fadeIn.finished.catch(()=>{});if(token!==run)return;
+   title.style.opacity='1';fadeIn.cancel();
   })():Promise.resolve();
   await Promise.all([current.finish(commit),text]);if(token!==run)return;
   if(commit){
-   render(current.target);
-   await Promise.all([...gallery.querySelectorAll('img')].map(image=>image.decode().catch(()=>{})));
-   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-   if(token!==run)return;
+   current.commit();render(current.target,true);
   }
   settleOpen();if(requested!==index)switchProject();
  }
@@ -158,6 +161,7 @@
  dialog.addEventListener('pointerup',e=>{if(outsideDown&&e.target===dialog)close();outsideDown=false;});
  function cancelDrag(){gesture=null;if(phase==='dragging'){run++;requested=index;settleOpen();}}
  dialog.addEventListener('pointercancel',()=>{outsideDown=false;cancelDrag();});
+ panel.addEventListener('lostpointercapture',()=>{if(phase==='dragging'){gesture=null;finishCarousel(false);}});
  dialog.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();close();return;}
   if(e.target.closest('input,textarea,select,[contenteditable="true"]')||e.metaKey||e.ctrlKey||e.altKey)return;
@@ -176,10 +180,10 @@
   if(!gesture||e.pointerId!==gesture.id)return;
   const dx=e.clientX-gesture.x,dy=e.clientY-gesture.y;
   if(!gesture.direction&&Math.abs(dy)>10&&Math.abs(dy)>Math.abs(dx)){cancelDrag();return;}
-  if(Math.abs(dx)<10||(!gesture.direction&&Math.abs(dx)<Math.abs(dy)*1.2))return;
+  if(!gesture.direction&&(Math.abs(dx)<10||Math.abs(dx)<Math.abs(dy)*1.2))return;
   if(reduced.matches||!carouselAPI)return;
   const direction=dx<0?1:-1;
-  if(!carousel||gesture.direction!==direction){gesture.direction=direction;beginCarousel(direction);try{panel.setPointerCapture(e.pointerId);}catch{}}
+  if(!carousel||gesture.direction!==direction){gesture.direction=direction;try{panel.setPointerCapture(e.pointerId);}catch{}beginCarousel(direction);}
   carousel.move(dx);
  },{passive:true});
  panel.addEventListener('pointerup',e=>{
@@ -194,7 +198,13 @@
   else if(phase==='switching'){run++;stopMotion();render(requested);settleOpen();}
   else if(phase==='closing'){run++;finishClose();}
  }
- addEventListener('resize',()=>{gesture=null;settleMotion();if(!mobile.matches)panel.scrollTop=0;else gallery.scrollTop=0;});
+ let viewportWidth=innerWidth;
+ addEventListener('resize',()=>{
+  // Safari toolbar/visual-viewport height changes are not orientation changes.
+  if(mobile.matches&&innerWidth===viewportWidth)return;
+  viewportWidth=innerWidth;gesture=null;settleMotion();if(!mobile.matches)panel.scrollTop=0;else gallery.scrollTop=0;
+ });
  reduced.addEventListener('change',()=>{if(reduced.matches)settleMotion();});
+ document.addEventListener('visibilitychange',()=>{if(mobile.matches&&document.hidden){gesture=null;settleMotion();}});
  addEventListener('pagehide',()=>{if(phase!=='closed'){run++;finishClose();}});
 })();
