@@ -6,6 +6,10 @@
 .intro>p,.brand{-webkit-text-stroke:var(--hero-optical-stroke) var(--paper)}.brand{-webkit-text-stroke-width:calc(var(--hero-optical-stroke) * var(--hero-opacity))}
 .home-page{position:relative}
 .home-page .brand{will-change:transform}
+/* Keep the same accessible link, but rasterize docked text at its true nav size.
+   These overrides beat the inline hero metrics and scroll-timeline transform;
+   removing is-docked restores the existing animation at its current progress. */
+.home-page.is-docked .brand{font-size:var(--nav-size)!important;line-height:24px!important;top:28px!important;transform:none!important;will-change:auto;-webkit-text-stroke:0 transparent}
 .desktop-chrome-track{position:absolute;bottom:0;width:max-content;z-index:30;pointer-events:none}
 .brand-track{left:var(--gutter)}.nav-track{right:calc(var(--gutter) + var(--viewer-scrollbar,0px))}
 .desktop-chrome-track>.brand,.desktop-chrome-track>.primary-nav{position:sticky;left:auto;right:auto;pointer-events:auto}
