@@ -5,7 +5,10 @@
 /* Updated Figma 112:2672: one centered creation screen, no rear dashboard. */
 .creation-composite{container-type:inline-size;background:#212121;aspect-ratio:715.6736/435}
 .creation-composite>.posts-create{width:91.8616%;height:auto;border-radius:1.033cqw;box-shadow:0 -1.4894cqw 7.447cqw rgb(0 0 0 / .04),0 -.7447cqw 4.4681cqw rgb(0 0 0 / .12)}
-.operations{aspect-ratio:10/7;background:#000}
+/* A single clip and 1px bleed prevent Safari video-layer rounding seams.
+   The source background changes color, so a black wrapper exposes a dark rim. */
+.operations{aspect-ratio:10/7;position:relative;background:transparent}
+.operations>video{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);object-fit:cover;border-radius:0}
 @media(max-width:600px){
  .mobile-showcase{--mockup-width:70;aspect-ratio:auto;padding-block:24px}
 }

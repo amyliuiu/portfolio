@@ -8,6 +8,24 @@
  const work=document.querySelector('#work'),workLinks=document.querySelectorAll('.primary-nav a[href="#work"],.footer-links a[href="#work"]');
  let nameTop=0,navTop=0,startSize=44,startLine=49.5,navSize=20,scrollFrame=0,workTop=0,headerHeight=80,workActive=false;
  const fontMeasure=document.createElement('canvas').getContext('2d');
+ let brandMotion=null;
+ function brandTransform(y){
+  const p=ease(y/Math.max(1,nameTop-28)),scale=(startSize+(navSize-startSize)*p)/startSize;
+  const line=startLine+(24-startLine)*p,baselineOffset=(line-startLine*scale)/2;
+  return `translate3d(0,${Math.max(28,nameTop-y)+baselineOffset}px,0) scale(${scale})`;
+ }
+ function configureBrandMotion(){
+  brandMotion?.cancel();brandMotion=null;
+  brand.style.top='0px';brand.style.fontSize=startSize+'px';brand.style.lineHeight=startLine+'px';
+  // Safari scrolls asynchronously. Let its scroll timeline own the entire
+  // transform, rather than chasing compositor scrolling from JS scroll events.
+  if(typeof ScrollTimeline==='function'&&CSS.supports('animation-range','0px 100px')&&nameTop>28){
+   try{brandMotion=brand.animate(Array.from({length:101},(_,i)=>({offset:i/100,transform:brandTransform((nameTop-28)*i/100)})),{
+    timeline:new ScrollTimeline({source:root,axis:'block'}),rangeStart:'0px',rangeEnd:(nameTop-28)+'px',fill:'both',duration:'auto'
+   });}catch{brandMotion?.cancel();brandMotion=null;}
+  }
+  brand.dataset.scrollDriver=brandMotion?'native':'fallback';
+ }
  function measure(){
   workTop=work.getBoundingClientRect().top+scrollY;
   headerHeight=parseFloat(getComputedStyle(root).getPropertyValue('--header-height'));
@@ -23,19 +41,12 @@
    const offset=(m.fontBoundingBoxAscent-m.fontBoundingBoxDescent-m.actualBoundingBoxAscent+m.actualBoundingBoxDescent)/2;
    nav.style.setProperty('--marker-shift',`${Number.isFinite(offset)?offset:0}px`);
   }
-  // Keep mobile glyph metrics stable. Scaling avoids re-laying out and
-  // re-hinting the font at every fractional scroll step on mobile browsers.
-  if(mobileNav.matches){brand.style.top='0px';brand.style.fontSize=startSize+'px';brand.style.lineHeight=startLine+'px';}
-  else brand.style.transform='';
+  configureBrandMotion();
   update();
  }
  function update(){
   scrollFrame=0;const y=scrollY,p=ease(y/Math.max(1,nameTop-28));
-  const top=Math.max(28,nameTop-y),size=startSize+(navSize-startSize)*p,line=startLine+(24-startLine)*p;
-  if(mobileNav.matches){
-   const scale=size/startSize,baselineOffset=(line-startLine*scale)/2;
-   brand.style.transform=`translate3d(0,${top+baselineOffset}px,0) scale(${scale})`;
-  }else{brand.style.top=top+'px';brand.style.fontSize=size+'px';brand.style.lineHeight=line+'px';}
+  if(!brandMotion)brand.style.transform=brandTransform(y);
   nav.style.top=mobileNav.matches?'28px':`${Math.max(28,navTop-y)}px`;
   root.style.setProperty('--hero-opacity',String(1-p));document.body.classList.toggle('is-docked',y>=nameTop-28);
   // Reveal the bar and marker together over the last 120px before Work reaches
