@@ -5,6 +5,7 @@
 .project-expand{opacity:0;transition:opacity 220ms ease-out;flex:none}
 .project-open{position:absolute;inset:0;width:100%;height:100%;border-radius:4px}
 .project-open[hidden]{display:none}
+.project-open[data-restored-pointer-focus]:focus{outline:none}
 @media(hover:hover){.project-preview:hover .project-expand{opacity:1}}
 .discount-hero{position:relative;background:#f4f4f4}
 .discount-hero>.discount-animation{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center top}
