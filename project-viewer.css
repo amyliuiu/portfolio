@@ -7,6 +7,11 @@
 .project-open[hidden]{display:none}
 .project-open[data-restored-pointer-focus]:focus{outline:none}
 @media(hover:hover){.project-preview:hover .project-expand{opacity:1}}
+/* Transform the complete clickable card; grid tracks and neighboring cards stay put. */
+@media(min-width:701px) and (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .project-preview.viewer-ready{transform-origin:center;transition:transform 220ms cubic-bezier(.2,.65,.3,1)}
+ .project-preview.viewer-ready:hover{transform:scale(1.015);z-index:1}
+}
 .discount-hero{position:relative;background:#f4f4f4}
 .discount-hero>.discount-animation{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center top}
 /* Native dialog gives background inertness and keyboard focus containment. */
