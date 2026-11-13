@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" shape-rendering="crispEdges" data-cell-size="2">
+<title>Blue and pink pixel plaid</title>
+<defs><pattern id="weave" width="12" height="12" patternUnits="userSpaceOnUse">
+<rect width="12" height="12" fill="#fff"/>
+<path fill="#7FCEEB" d="M0 0h2v2h-2zM4 0h2v2h-2zM6 0h2v2h-2zM10 0h2v2h-2zM2 2h2v2h-2zM8 2h2v2h-2zM0 4h2v2h-2zM10 4h2v2h-2zM0 6h2v2h-2zM10 6h2v2h-2zM2 8h2v2h-2zM8 8h2v2h-2zM0 10h2v2h-2zM4 10h2v2h-2zM6 10h2v2h-2zM10 10h2v2h-2z"/>
+<path fill="#F5B4C8" d="M4 4h2v2h-2zM6 4h2v2h-2zM4 6h2v2h-2zM6 6h2v2h-2z"/>
+</pattern></defs><rect width="12" height="12" fill="url(#weave)"/>
+</svg>

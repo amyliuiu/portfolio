@@ -1,0 +1,15 @@
+/* Fresh production page shells; no exploration layouts or motion engines. */
+.page-shell{min-height:100svh;display:flex;flex-direction:column}
+.page-shell .brand,.page-shell .primary-nav{top:28px}
+.page-shell .brand{font-size:var(--nav-size);line-height:24px;-webkit-text-stroke-width:0}
+.page-content{flex:1;padding:calc(var(--header-height) + 96px) var(--gutter) 96px}
+.page-content h1{font-size:44px;line-height:1.125;font-weight:400;margin:0 0 20px}
+.page-content p{font-size:20px;line-height:1.5;color:#404040;margin:0}
+.page-shell .page-footer{margin-top:0;min-height:0}
+.page-shell .footer-content{padding:48px var(--gutter) 40px;justify-content:flex-end}
+@media(max-width:600px){
+ .page-content{padding-top:calc(var(--header-height) + 48px);padding-bottom:64px}
+ .page-content h1{font-size:32px}
+ .page-content p{font-size:18px}
+ .page-shell .footer-content{align-items:flex-start}
+}

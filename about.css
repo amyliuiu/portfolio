@@ -1,0 +1,13 @@
+/* Figma “Pages for dev” / about me (129:3349). Images intentionally deferred. */
+.about-page .page-content{padding-top:150px;padding-bottom:72px}
+.bio{width:380px;max-width:100%}
+.about-page .bio p{font-size:20px;line-height:26px;margin:0 0 28px;display:flow-root}
+.about-page .bio p:last-child{margin-bottom:0}
+.bio a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.illuminated-initial{position:relative;float:left;width:72px;height:72px;margin:0 12px 0 0;user-select:none}
+.illuminated-initial>img,.illuminated-initial>svg{position:absolute;inset:0;width:72px;height:72px;display:block}
+.illuminated-initial text{font-family:Henry,serif;font-size:76px;font-weight:400;fill:var(--ink);stroke:var(--paper);stroke-width:2px;stroke-linejoin:round;paint-order:stroke fill}
+@media(max-width:600px){
+ .about-page .page-content{padding-top:120px;padding-bottom:64px}
+ .about-page .bio p{font-size:18px;line-height:26px}
+}

@@ -1,0 +1,11 @@
+/* Shared first-row phone geometry; keep treatments separate from source media. */
+.mobile-showcase{container-type:inline-size;background:#f4f4f4;--mockup-width:45.55;--screen-reference:211.6375}
+.phone-screen{width:calc(var(--mockup-width) * 1%);aspect-ratio:402/874;overflow:hidden;background:#fff;border-radius:calc(var(--mockup-width) * 30cqw / var(--screen-reference) + 2px);box-shadow:0 calc(var(--mockup-width) * 8cqw / var(--screen-reference)) calc(var(--mockup-width) * 40cqw / var(--screen-reference)) rgb(0 0 0 / .04),0 calc(var(--mockup-width) * 4cqw / var(--screen-reference)) calc(var(--mockup-width) * 24cqw / var(--screen-reference)) rgb(0 0 0 / .12)}
+.phone-screen>img,.phone-screen>video{display:block;width:100%;height:100%;object-fit:contain;border-radius:0}
+/* Updated Figma 112:2672: one centered creation screen, no rear dashboard. */
+.creation-composite{container-type:inline-size;background:#212121;aspect-ratio:715.6736/435}
+.creation-composite>.posts-create{width:91.8616%;height:auto;border-radius:1.033cqw;box-shadow:0 -1.4894cqw 7.447cqw rgb(0 0 0 / .04),0 -.7447cqw 4.4681cqw rgb(0 0 0 / .12)}
+.operations{aspect-ratio:10/7;background:#000}
+@media(max-width:600px){
+ .mobile-showcase{--mockup-width:70;aspect-ratio:auto;padding-block:24px}
+}
