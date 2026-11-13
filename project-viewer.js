@@ -8,6 +8,11 @@
  const card=document.querySelector('[data-asset="shop-discounts"]'),sourceVideo=card.querySelector('video'),heroVideo=hero.querySelector('video');
  const closeButton=dialog.querySelector('.viewer-close'),reduced=matchMedia('(prefers-reduced-motion: reduce)');
  let phase='closed',run=0,animations=[],flight=null,returnFocus=null,locked=null,outsideDown=false;
+ // Safari may mark programmatic dialog autofocus as focus-visible after a tap.
+ // Track the actual input instead of removing accessible keyboard focus styles.
+ dialog.dataset.input='keyboard';
+ document.addEventListener('pointerdown',()=>{dialog.dataset.input='pointer';},{capture:true,passive:true});
+ document.addEventListener('keydown',e=>{if(!e.metaKey&&!e.ctrlKey&&!e.altKey)dialog.dataset.input='keyboard';},true);
  const notify=()=>document.dispatchEvent(new Event('project-viewer:change'));
  function setPhase(value){phase=value;dialog.dataset.phase=value;notify();}
  function stopMotion(){animations.forEach(a=>a.cancel());animations=[];flight?.remove();flight=null;hero.style.visibility='';}

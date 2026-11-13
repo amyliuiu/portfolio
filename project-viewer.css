@@ -26,7 +26,9 @@
 .viewer-navigation button,.viewer-close{position:relative;width:var(--viewer-title-line-height);height:var(--viewer-title-line-height);display:grid;place-items:center;flex:none;background:rgb(188 188 188 / .2);border-radius:4px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .viewer-navigation button:disabled{opacity:.4}
 .viewer-close{z-index:4}
-.viewer-close:focus-visible{outline-offset:-2px}
+.viewer-close{-webkit-tap-highlight-color:transparent}
+.viewer-close:focus-visible,.project-viewer[data-input="keyboard"] .viewer-close:focus{outline:2px solid #638e9f;outline-offset:-2px}
+.project-viewer[data-input="pointer"] .viewer-close:focus{outline:none}
 .viewer-close img{width:12px;height:12px}
 .viewer-navigation img{width:16px;height:16px}
 .viewer-gallery{grid-column:1;grid-row:1;min-width:0;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}

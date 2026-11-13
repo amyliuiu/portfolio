@@ -23,11 +23,19 @@
    const offset=(m.fontBoundingBoxAscent-m.fontBoundingBoxDescent-m.actualBoundingBoxAscent+m.actualBoundingBoxDescent)/2;
    nav.style.setProperty('--marker-shift',`${Number.isFinite(offset)?offset:0}px`);
   }
+  // Keep mobile glyph metrics stable. Scaling avoids re-laying out and
+  // re-hinting the font at every fractional scroll step on mobile browsers.
+  if(mobileNav.matches){brand.style.top='0px';brand.style.fontSize=startSize+'px';brand.style.lineHeight=startLine+'px';}
+  else brand.style.transform='';
   update();
  }
  function update(){
   scrollFrame=0;const y=scrollY,p=ease(y/Math.max(1,nameTop-28));
-  brand.style.top=`${Math.max(28,nameTop-y)}px`;brand.style.fontSize=`${startSize+(navSize-startSize)*p}px`;brand.style.lineHeight=`${startLine+(24-startLine)*p}px`;
+  const top=Math.max(28,nameTop-y),size=startSize+(navSize-startSize)*p,line=startLine+(24-startLine)*p;
+  if(mobileNav.matches){
+   const scale=size/startSize,baselineOffset=(line-startLine*scale)/2;
+   brand.style.transform=`translate3d(0,${top+baselineOffset}px,0) scale(${scale})`;
+  }else{brand.style.top=top+'px';brand.style.fontSize=size+'px';brand.style.lineHeight=line+'px';}
   nav.style.top=mobileNav.matches?'28px':`${Math.max(28,navTop-y)}px`;
   root.style.setProperty('--hero-opacity',String(1-p));document.body.classList.toggle('is-docked',y>=nameTop-28);
   // Reveal the bar and marker together over the last 120px before Work reaches
@@ -39,7 +47,7 @@
   document.querySelector('.intro').style.visibility=p===1?'hidden':'visible';
  }
  addEventListener('scroll',()=>{if(!scrollFrame)scrollFrame=requestAnimationFrame(update)},{passive:true});
- new ResizeObserver(measure).observe(hero);document.fonts.ready.then(measure);measure();
+ new ResizeObserver(measure).observe(hero);document.fonts.ready.then(measure);mobileNav.addEventListener('change',measure);measure();
  reduced.addEventListener('change',update);
 
  const container=document.querySelector('.footer-art');
