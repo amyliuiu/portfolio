@@ -73,14 +73,16 @@
 
  const container=document.querySelector('.footer-art');
  let geometry=null,stitches=[],palette=null,svg=null,canvas=null,ctx=null,frame=0,start=0,next=0,played=false,active=false,footerHover=null;
+ let footerSample=null,footerSignature="";
+ window.PortfolioFooterWeave={getGeometry:()=>geometry,sampleCell:(col,row)=>footerSample?.(col,row)??null};
  function startFooterHover(){
   if(footerHover||!geometry||!svg||!played||active||reduced.matches||document.hidden||control.getAttribute('aria-pressed')==='false')return;
   footerHover=window.FooterPlaidThreads.create({
    field:svg,landing:container.closest('.page-footer'),control,
-   sampleCell:window.PortfolioWeave.sampleCell,
-   pointerPosition:event=>{const r=container.getBoundingClientRect();return {x:event.clientX-r.left,y:geometry.fadeEnd-(event.clientY-r.top)};},
+   sampleCell:footerSample,
+   pointerPosition:event=>{const r=svg.getBoundingClientRect();return {x:event.clientX-r.left,y:geometry.fadeEnd-(event.clientY-r.top)};},
   });
-  // Render in original weave coordinates, then mirror both SVG and hover canvas.
+  // Static, arrival, and hover share the footer’s native-pixel sampler and coordinates.
   footerHover.refresh({...geometry,height:geometry.fadeEnd});
  }
  function finish(enableHover=true){
@@ -90,18 +92,34 @@
  }
  function buildFooter(){
   const api=window.PortfolioWeave;if(!api?.getGeometry())return;
-  const wasPlayed=played;footerHover?.destroy();footerHover=null;finish(false);geometry=api.getGeometry();const {width,fadeEnd,cell}=geometry;
+  const source=api.getGeometry(),{width,cell}=source;
+  const fadeEnd=Math.max(cell,Math.floor(container.getBoundingClientRect().height/cell)*cell),signature=`${width}:${fadeEnd}`;
+  if(signature===footerSignature)return;footerSignature=signature;
+  const wasPlayed=played;footerHover?.destroy();footerHover=null;finish(false);
+  geometry={...source,height:fadeEnd,fadeEnd,textTop:fadeEnd+24};
+  footerSample=api.createSampler(geometry);
   root.style.setProperty('--footer-art-height',`${fadeEnd}px`);
   const colors=getComputedStyle(root);
   palette={main:colors.getPropertyValue('--plaid-main').trim(),accent:colors.getPropertyValue('--plaid-accent').trim()};
-  svg=document.querySelector('.plaid-field').cloneNode(true);svg.removeAttribute('class');
-  svg.querySelectorAll('[data-motion]').forEach(n=>n.remove());svg.querySelector('[data-static-plaid]').removeAttribute('mask');
-  svg.querySelectorAll('[id]').forEach(n=>{n.id='footer-'+n.id});
-  svg.querySelectorAll('[fill]').forEach(n=>{const f=n.getAttribute('fill');if(f.startsWith('url(#'))n.setAttribute('fill',f.replace('url(#','url(#footer-'))});
-  svg.setAttribute('height',fadeEnd);svg.setAttribute('viewBox',`0 0 ${width} ${fadeEnd}`);container.replaceChildren(svg);
+  const definitions=[],rows=[];
+  for(let row=0;row*cell<fadeEnd;row++){
+   const paths={main:[],accent:[]};
+   for(let col=0;col*cell<Math.min(source.repeat,width);col++){
+    const s=footerSample(col,row);if(!s)continue;
+    paths[s.color].push(`M${s.x} ${+(s.y-row*cell).toFixed(3)}h${s.size}v${s.size}h-${s.size}z`);
+   }
+   if(!paths.main.length&&!paths.accent.length)continue;
+   const id=`footer-row-${row}`;
+   definitions.push(`<pattern id="${id}" width="${source.repeat}" height="${cell}" patternUnits="userSpaceOnUse">`);
+   for(const color of ['main','accent'])if(paths[color].length)definitions.push(`<path fill="var(--plaid-${color}, ${palette[color]})" d="${paths[color].join('')}"/>`);
+   definitions.push('</pattern>');rows.push(`<rect y="${row*cell}" width="${width}" height="${cell}" fill="url(#${id})"/>`);
+  }
+  svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width',width);svg.setAttribute('height',fadeEnd);svg.setAttribute('viewBox',`0 0 ${width} ${fadeEnd}`);
+  svg.innerHTML=`<defs>${definitions.join('')}</defs><g data-static-plaid>${rows.join('')}</g>`;container.replaceChildren(svg);
   stitches=[];
   for(let row=0;row*cell<fadeEnd;row++)for(let col=0;col*cell<width;col++){
-   const s=api.sampleCell(col,row);if(!s)continue;
+   const s=footerSample(col,row);if(!s)continue;
    const at=window.HomePixelEntrance.math.arrivalAt(col,row,fadeEnd,cell)+650*(1-2*row*cell/fadeEnd);
    stitches.push({...s,y:fadeEnd-s.y-s.size,at});
   }
@@ -129,6 +147,7 @@
   canvas.dataset.shown=next;canvas.dataset.total=stitches.length;frame=requestAnimationFrame(tick);
  }
  new IntersectionObserver(checkFooter,{threshold:[0,.05,.2]}).observe(container);
+ new ResizeObserver(buildFooter).observe(container);
  addEventListener('plaid:rendered',buildFooter);buildFooter();
  reduced.addEventListener('change',()=>{if(reduced.matches){played=true;finish();}else queueMicrotask(startFooterHover);});
  control.addEventListener('click',()=>queueMicrotask(()=>{if(control.getAttribute('aria-pressed')==='false'){played=true;finish();}else startFooterHover();}));

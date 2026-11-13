@@ -41,14 +41,27 @@
   let geometry = null;
   let motion = null;
   let rowData = [];
-  window.PortfolioWeave = {sampleCell, getGeometry: () => geometry};
+  window.PortfolioWeave = {sampleCell, createSampler, getGeometry: () => geometry};
+
+  function makeRow(rowIndex, fadeEnd) {
+    const y = rowIndex * CELL, progress = y / fadeEnd;
+    const opening = smooth(0.11, 0.53, progress), disappearing = smooth(0.53, 1, progress);
+    const size = 2 - 0.5 * opening - 0.65 * disappearing;
+    const sy = rowIndex % across.length;
+    return {sy, horizontal: y % HORIZONTAL_PINK_SPACING === HORIZONTAL_PINK_OFFSET ? 'accent' : across[sy],
+      size, density: 1 - disappearing, inset: (CELL - size) / 2};
+  }
+  // Independent fade length, but identical native lattice, palette, and dropout seed.
+  function createSampler({width, fadeEnd}) {
+    const rows = Array.from({length: Math.ceil(fadeEnd / CELL)}, (_, row) => makeRow(row, Math.max(CELL, fadeEnd - CELL)));
+    return (col, row) => sampleCell(col, row, rows[row] || null, width);
+  }
 
   // One source of truth for the settled SVG and the moving threads.
   // Crossings define the weave. Motion samples the same cells, then applies
   // one shared fabric displacement to both thread directions.
-  function sampleCell(colIndex, rowIndex) {
-    const row = rowData[rowIndex];
-    if (!row || colIndex < 0 || colIndex * CELL >= geometry.width) return null;
+  function sampleCell(colIndex, rowIndex, row = rowData[rowIndex], width = geometry.width) {
+    if (!row || colIndex < 0 || colIndex * CELL >= width) return null;
     const sx = colIndex % along.length;
     const phase = (Math.min(sx, along.length - 1 - sx) + Math.min(row.sy, across.length - 1 - row.sy)) % 2;
     const color = phase === 0 ? along[sx] : row.horizontal;
@@ -72,7 +85,7 @@
     previous = signature;
     motion?.reset();
     geometry = {
-      width, height, fadeEnd, textTop, cell: CELL,
+      width, height, fadeEnd, textTop, cell: CELL, repeat: REPEAT,
       warp: along,
       weft: across.map((color, index) => index * CELL % HORIZONTAL_PINK_SPACING === HORIZONTAL_PINK_OFFSET ? 'accent' : color),
     };
@@ -81,17 +94,8 @@
     const rows = [];
 
     for (let y = 0; y < fadeEnd; y += CELL) {
-      const progress = y / fadeEnd;
-      const opening = smooth(0.11, 0.53, progress);
-      const disappearing = smooth(0.53, 1, progress);
-      const size = 2 - 0.5 * opening - 0.65 * disappearing;
-      const density = 1 - disappearing;
-      const inset = (CELL - size) / 2;
       const rowIndex = y / CELL;
-      const sy = rowIndex % across.length;
-      const horizontal = y % HORIZONTAL_PINK_SPACING === HORIZONTAL_PINK_OFFSET
-        ? 'accent' : across[sy];
-      rowData[rowIndex] = {sy, horizontal, size, density, inset};
+      const {inset} = rowData[rowIndex] = makeRow(rowIndex, fadeEnd);
       const paths = { main: [], accent: [] };
 
       for (let x = 0; x < Math.min(REPEAT, width); x += CELL) {
