@@ -29,9 +29,9 @@
 .viewer-details{grid-column:2;grid-row:1;display:flex;flex-direction:column;min-width:0;min-height:0}
 .viewer-copy{min-height:0;overflow:auto}
 .viewer-title-row{display:grid;grid-template-columns:minmax(0,1fr) var(--viewer-title-line-height);align-items:start;gap:24px}
-.viewer-details h2{font-size:20px;line-height:var(--viewer-title-line-height);font-weight:400;margin:0;overflow-wrap:anywhere}
-.viewer-date{font-size:16px;line-height:20px;color:rgb(0 0 0 / .56);margin:8px 0 0}
-.viewer-caption{font-size:16px;line-height:20px;color:rgb(0 0 0 / .75);margin:20px 0 0}
+.viewer-details h2{color:#000;font-size:20px;line-height:var(--viewer-title-line-height);font-weight:400;margin:0;overflow-wrap:anywhere}
+.viewer-date{font-size:16px;line-height:normal;color:rgb(0 0 0 / .56);margin:8px 0 0}
+.viewer-caption{font-size:16px;line-height:20px;color:rgb(0 0 0 / .75);margin:16px 0 0}
 .viewer-date:empty,.viewer-caption:empty{display:none}
 .viewer-navigation{display:flex;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:20px}
 .viewer-navigation button,.viewer-close{position:relative;width:var(--viewer-title-line-height);height:var(--viewer-title-line-height);display:grid;place-items:center;flex:none;background:rgb(188 188 188 / .2);border-radius:4px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}

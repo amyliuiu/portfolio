@@ -5,6 +5,11 @@
  const panel=dialog.querySelector('.project-panel'),gallery=dialog.querySelector('.viewer-gallery'),title=dialog.querySelector('#viewer-title');
  const closeButton=dialog.querySelector('.viewer-close'),previous=dialog.querySelector('[aria-label="Previous project"]'),next=dialog.querySelector('[aria-label="Next project"]');
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),mobile=matchMedia('(max-width:700px)');
+ const date=dialog.querySelector('#viewer-date'),captionText=dialog.querySelector('.viewer-caption'),copyNodes=[title,date,captionText];
+ const projectCopy={
+  'shop-posts':{date:'March 2026',caption:'As Shop evolves into shopping-entertainment, we needed a way to provide fresh, dynamic content beyond product recommendations. Shop Posts serve as the foundation for getting user-generated content onto Shop.'},
+  'shop-discounts':{date:'August 2026',caption:'As merchants began to adopt Shop Posts, they wanted a way to promote not only products, but also discounts and sales. Now, merchants can tag discounts created in the Shopify admin to their posts. Shoppers are able to checkout with discounts automatically applied.'},
+ };
  const discounts=[...gallery.children].map(n=>n.cloneNode(true)),expand=document.querySelector('.project-expand');
  const projects=[...document.querySelectorAll('.work .project-image')].map((card,index)=>{
   const figure=card.closest('figure'),caption=figure.querySelector('figcaption'),name=caption.textContent.trim();
@@ -17,7 +22,7 @@
   trigger.hidden=false;trigger.dataset.projectIndex=index;trigger.setAttribute('aria-label','Open '+name);trigger.setAttribute('aria-haspopup','dialog');trigger.setAttribute('aria-controls',dialog.id);trigger.setAttribute('aria-expanded','false');
   trigger.addEventListener('click',()=>open(index));
   trigger.addEventListener('blur',()=>delete trigger.dataset.restoredPointerFocus);
-  return {card,trigger,name,id:card.dataset.asset};
+  return {card,trigger,name,id:card.dataset.asset,date:'',caption:'',...projectCopy[card.dataset.asset]};
  });
  const announcement=document.createElement('div');announcement.className='sr-only';announcement.setAttribute('role','status');dialog.append(announcement);
  let index=1,requested=1,entry=1,phase='closed',run=0,animations=[],flight=null,returnFocus=null,locked=null,outsideDown=false,gesture=null;
@@ -32,7 +37,7 @@
  },true);
  const notify=()=>document.dispatchEvent(new Event('project-viewer:change'));
  function setPhase(value){phase=value;dialog.dataset.phase=value;notify();}
- function stopMotion(){animations.forEach(a=>a.cancel());animations=[];flight?.remove();flight=null;carousel?.destroy();carousel=null;title.style.opacity='';if(hero)hero.style.visibility='';}
+ function stopMotion(){animations.forEach(a=>a.cancel());animations=[];flight?.remove();flight=null;carousel?.destroy();carousel=null;copyNodes.forEach(n=>n.style.opacity='');if(hero)hero.style.visibility='';}
  function animate(node,frames,duration=360){const a=node.animate(frames,{duration,easing:'ease-in-out',fill:'both'});animations.push(a);return a.finished.catch(()=>{});}
  function announce(){announcement.textContent=projects[index].name+', project '+(index+1)+' of '+projects.length;}
  function makeMedia(selected){
@@ -48,10 +53,11 @@
   }
   return media;
  }
+ function renderCopy(selected){const project=projects[selected];title.textContent=project.name;date.textContent=project.date;captionText.textContent=project.caption;}
  function render(selected,keepMedia=false){
   index=selected;const project=projects[index];
   if(!keepMedia)gallery.replaceChildren(...makeMedia(selected));hero=gallery.firstElementChild;
-  title.textContent=project.name;dialog.dataset.project=project.id;gallery.setAttribute('aria-label',project.name+' media');
+  renderCopy(selected);dialog.dataset.project=project.id;gallery.setAttribute('aria-label',project.name+' media');
   gallery.scrollTop=panel.scrollTop=0;dialog.querySelector('.viewer-copy').scrollTop=0;
   previous.disabled=index===0;next.disabled=index===projects.length-1;
   if(document.activeElement===previous&&previous.disabled)next.focus({preventScroll:true});
@@ -104,7 +110,7 @@
  }
  async function close(){
   if(phase==='closed'||phase==='closing')return;
-  const token=++run;title.textContent=projects[index].name;stopMotion();setPhase('closing');
+  const token=++run;renderCopy(index);stopMotion();setPhase('closing');
   if(reduced.matches){finishClose();return;}
   const tasks=[animate(panel,[{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.98)'}])];
   if(index===entry&&projects[index].id==='shop-discounts'){
@@ -119,7 +125,7 @@
  function beginCarousel(direction){
   carousel?.destroy();
   const target=index+direction;
-  carousel=carouselAPI.create({dialog,panel,gallery,details,target:projects[target]?target:null,name:projects[target]?.name,media:projects[target]?makeMedia(target):[],direction});
+  carousel=carouselAPI.create({dialog,panel,gallery,details,target:projects[target]?target:null,name:projects[target]?.name,date:projects[target]?.date,caption:projects[target]?.caption,media:projects[target]?makeMedia(target):[],direction});
   setPhase('dragging');return carousel;
  }
  async function finishCarousel(commit,preserveRequested=false){
@@ -131,21 +137,21 @@
    await Promise.race([current.ready,new Promise(r=>setTimeout(r,1500))]);
    if(token!==run)return;
   }
-  const text=commit?fadeTitle(token,()=>{title.textContent=projects[current.target].name;panel.scrollTop=0;}):Promise.resolve();
+  const text=commit?fadeTitle(token,()=>{renderCopy(current.target);panel.scrollTop=0;}):Promise.resolve();
   await Promise.all([current.finish(commit),text]);if(token!==run)return;
   if(commit){current.commit();render(current.target,true);}
   settleOpen();if(requested!==index)switchProject();
  }
  async function fadeTitle(token,change){
-   const fadeOut=title.animate([{opacity:1},{opacity:0}],{duration:160,easing:'ease-out',fill:'forwards'});animations.push(fadeOut);
-   await fadeOut.finished.catch(()=>{});if(token!==run)return;
-   // Persist zero opacity before replacing text; retire the old animation entirely.
-   title.style.opacity='0';fadeOut.cancel();
+   const fadeOut=copyNodes.map(n=>n.animate([{opacity:1},{opacity:0}],{duration:160,easing:'ease-out',fill:'forwards'}));animations.push(...fadeOut);
+   await Promise.all(fadeOut.map(a=>a.finished.catch(()=>{})));if(token!==run)return;
+   // Replace the entire text entry together at zero opacity; controls stay visible.
+   copyNodes.forEach(n=>n.style.opacity='0');fadeOut.forEach(a=>a.cancel());
    change();
    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));if(token!==run)return;
-   const fadeIn=title.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-in',fill:'forwards'});animations.push(fadeIn);
-   await fadeIn.finished.catch(()=>{});if(token!==run)return;
-   title.style.opacity='1';fadeIn.cancel();
+   const fadeIn=copyNodes.map(n=>n.animate([{opacity:0},{opacity:1}],{duration:220,easing:'ease-in',fill:'forwards'}));animations.push(...fadeIn);
+   await Promise.all(fadeIn.map(a=>a.finished.catch(()=>{})));if(token!==run)return;
+   copyNodes.forEach(n=>n.style.opacity='1');fadeIn.forEach(a=>a.cancel());
  }
  async function switchProject(){
   if(mobile.matches&&!reduced.matches&&carouselAPI){beginCarousel(Math.sign(requested-index));finishCarousel(true,true);return;}

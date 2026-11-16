@@ -4,7 +4,7 @@
  const warmed=new Map();
  function warm(url){if(!url)return Promise.resolve();if(!warmed.has(url)){const image=new Image();image.src=url;warmed.set(url,image.decode().catch(()=>{}));}return warmed.get(url);}
  const warmMedia=nodes=>Promise.all(nodes.flatMap(n=>[...n.querySelectorAll('img,video')].map(m=>warm(m.tagName==='VIDEO'?m.poster:m.src))));
- function create({dialog,panel,gallery,details,target,name,media,direction}){
+ function create({dialog,panel,gallery,details,target,name,date='',caption='',media,direction}){
   const width=innerWidth,rect=gallery.getBoundingClientRect(),savedHeight=gallery.style.height;
   const host=document.createElement('div');host.className='mobile-carousel';host.setAttribute('aria-hidden','true');host.inert=true;
   const outgoing=document.createElement('div');outgoing.className='carousel-page';host.append(outgoing);
@@ -14,7 +14,7 @@
   old.append(...gallery.childNodes);
   let incoming=null,preview=null,ready=Promise.resolve(),committed=false;
   if(target!==null){
-   const probe=details.cloneNode(true);probe.inert=true;probe.setAttribute('aria-hidden','true');probe.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));probe.querySelector('h2').textContent=name;
+   const probe=details.cloneNode(true);probe.inert=true;probe.setAttribute('aria-hidden','true');probe.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));probe.querySelector('h2').textContent=name;probe.querySelector('.viewer-date').textContent=date;probe.querySelector('.viewer-caption').textContent=caption;
    probe.style.cssText=`position:fixed;visibility:hidden;pointer-events:none;top:0;left:0;width:${details.getBoundingClientRect().width}px;`;
    const css=getComputedStyle(panel);probe.style.setProperty('--viewer-title-line-height',css.getPropertyValue('--viewer-title-line-height'));
    dialog.append(probe);const top=parseFloat(css.paddingTop)+probe.getBoundingClientRect().height+parseFloat(css.rowGap);probe.remove();
