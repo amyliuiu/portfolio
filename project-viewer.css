@@ -34,7 +34,14 @@
 .viewer-caption{font-size:16px;line-height:20px;color:rgb(0 0 0 / .75);margin:16px 0 0}
 .viewer-date:empty,.viewer-caption:empty{display:none}
 .viewer-navigation{display:flex;justify-content:flex-end;gap:8px;margin-top:auto;padding-top:20px}
-.viewer-navigation button,.viewer-close{position:relative;width:var(--viewer-title-line-height);height:var(--viewer-title-line-height);display:grid;place-items:center;flex:none;background:rgb(188 188 188 / .2);border-radius:4px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.viewer-navigation button,.viewer-close{position:relative;isolation:isolate;width:var(--viewer-title-line-height);height:var(--viewer-title-line-height);display:grid;place-items:center;flex:none;background:transparent;border-radius:4px}
+/* Animate only the face and glyph; button geometry, focus ring and hit area stay fixed. */
+.viewer-navigation button::after,.viewer-close::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;background:rgb(188 188 188 / .2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+@media(prefers-reduced-motion:no-preference){
+ .viewer-navigation button::after,.viewer-close::after,.viewer-navigation button img,.viewer-close img{transform:scale(var(--icon-press-scale,1));transition:transform 160ms ease-out}
+ .viewer-navigation button:not(:disabled):is(:active,[data-pressed]),.viewer-close:not(:disabled):is(:active,[data-pressed]){--icon-press-scale:.92}
+ .viewer-navigation button:not(:disabled):is(:active,[data-pressed])::after,.viewer-close:not(:disabled):is(:active,[data-pressed])::after,.viewer-navigation button:not(:disabled):is(:active,[data-pressed]) img,.viewer-close:not(:disabled):is(:active,[data-pressed]) img{transition-duration:100ms}
+}
 .viewer-navigation button:disabled{opacity:.4}
 .viewer-close{z-index:4}
 .viewer-close{-webkit-tap-highlight-color:transparent}

@@ -4,6 +4,15 @@
  const dialog=document.getElementById('project-viewer');if(!dialog||typeof dialog.showModal!=='function')return;
  const panel=dialog.querySelector('.project-panel'),gallery=dialog.querySelector('.viewer-gallery'),title=dialog.querySelector('#viewer-title');
  const closeButton=dialog.querySelector('.viewer-close'),previous=dialog.querySelector('[aria-label="Previous project"]'),next=dialog.querySelector('[aria-label="Next project"]');
+ const iconButtons=[closeButton,previous,next];
+ const clearIconPress=()=>iconButtons.forEach(b=>delete b.dataset.pressed);
+ for(const button of iconButtons){
+  button.addEventListener('pointerdown',e=>{if(!button.disabled&&e.button===0){clearIconPress();button.dataset.pressed='true';}});
+  button.addEventListener('pointerleave',()=>delete button.dataset.pressed);
+ }
+ for(const event of ['pointerup','pointercancel'])document.addEventListener(event,clearIconPress,true);
+ addEventListener('blur',clearIconPress);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)clearIconPress();});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),mobile=matchMedia('(max-width:700px)');
  const date=dialog.querySelector('#viewer-date'),captionText=dialog.querySelector('.viewer-caption'),copyNodes=[title,date,captionText];
  const projectCopy={
@@ -37,7 +46,7 @@
  },true);
  const notify=()=>document.dispatchEvent(new Event('project-viewer:change'));
  function setPhase(value){phase=value;dialog.dataset.phase=value;notify();}
- function stopMotion(){animations.forEach(a=>a.cancel());animations=[];flight?.remove();flight=null;carousel?.destroy();carousel=null;copyNodes.forEach(n=>n.style.opacity='');if(hero)hero.style.visibility='';}
+ function stopMotion(){clearIconPress();animations.forEach(a=>a.cancel());animations=[];flight?.remove();flight=null;carousel?.destroy();carousel=null;copyNodes.forEach(n=>n.style.opacity='');if(hero)hero.style.visibility='';}
  function animate(node,frames,duration=360){const a=node.animate(frames,{duration,easing:'ease-in-out',fill:'both'});animations.push(a);return a.finished.catch(()=>{});}
  function announce(){announcement.textContent=projects[index].name+', project '+(index+1)+' of '+projects.length;}
  function makeMedia(selected){
