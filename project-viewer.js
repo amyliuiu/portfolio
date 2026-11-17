@@ -6,13 +6,26 @@
  const closeButton=dialog.querySelector('.viewer-close'),previous=dialog.querySelector('[aria-label="Previous project"]'),next=dialog.querySelector('[aria-label="Next project"]');
  const iconButtons=[closeButton,previous,next];
  const clearIconPress=()=>iconButtons.forEach(b=>delete b.dataset.pressed);
+ // Keep keyboard holds separate from navigation cleanup; quick taps get a visible 120ms press beat.
+ const keyPresses=new Map();
+ function releaseKeyPress(key,immediate=false){
+  const press=keyPresses.get(key);if(!press)return;clearTimeout(press.timer);
+  const release=()=>{if(keyPresses.get(key)!==press)return;delete press.button.dataset.keyPressed;keyPresses.delete(key);};
+  if(immediate)release();else press.timer=setTimeout(release,Math.max(0,120-(performance.now()-press.started)));
+ }
+ function clearKeyPresses(){for(const key of keyPresses.keys())releaseKeyPress(key,true);}
+ function pressKeyIcon(key,button){
+  if(button.disabled||!dialog.open)return;
+  releaseKeyPress(key,true);keyPresses.set(key,{button,started:performance.now(),timer:0});button.dataset.keyPressed='true';
+ }
+ document.addEventListener('keyup',e=>releaseKeyPress(e.key),true);
  for(const button of iconButtons){
-  button.addEventListener('pointerdown',e=>{if(!button.disabled&&e.button===0){clearIconPress();button.dataset.pressed='true';}});
+  button.addEventListener('pointerdown',e=>{if(!button.disabled&&e.button===0){clearIconPress();clearKeyPresses();button.dataset.pressed='true';}});
   button.addEventListener('pointerleave',()=>delete button.dataset.pressed);
  }
  for(const event of ['pointerup','pointercancel'])document.addEventListener(event,clearIconPress,true);
- addEventListener('blur',clearIconPress);
- document.addEventListener('visibilitychange',()=>{if(document.hidden)clearIconPress();});
+ addEventListener('blur',()=>{clearIconPress();clearKeyPresses();});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){clearIconPress();clearKeyPresses();}});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)'),mobile=matchMedia('(max-width:700px)');
  const date=dialog.querySelector('#viewer-date'),captionText=dialog.querySelector('.viewer-caption'),copyNodes=[title,date,captionText];
  const projectCopy={
@@ -112,14 +125,14 @@
   await Promise.all(tasks);if(token===run&&phase==='opening')settleOpen();
  }
  function finishClose(){
-  stopMotion();gesture=null;setPhase('closed');
+  clearKeyPresses();stopMotion();gesture=null;setPhase('closed');
   if(returnFocus&&dialog.dataset.input==='pointer')returnFocus.dataset.restoredPointerFocus='true';
   dialog.close();unlock();returnFocus?.setAttribute('aria-expanded','false');
   if(returnFocus?.isConnected)returnFocus.focus({preventScroll:true});notify();
  }
  async function close(){
   if(phase==='closed'||phase==='closing')return;
-  const token=++run;renderCopy(index);stopMotion();setPhase('closing');
+  clearKeyPresses();const token=++run;renderCopy(index);stopMotion();setPhase('closing');
   if(reduced.matches){finishClose();return;}
   const tasks=[animate(panel,[{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.98)'}])];
   if(index===entry&&projects[index].id==='shop-discounts'){
@@ -190,7 +203,9 @@
  dialog.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();close();return;}
   if(e.target.closest('input,textarea,select,[contenteditable="true"]')||e.metaKey||e.ctrlKey||e.altKey)return;
-  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();if(!e.repeat)navigate(e.key==='ArrowRight'?1:-1);return;}
+  if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
+   e.preventDefault();if(!e.repeat){const right=e.key==='ArrowRight',before=requested;navigate(right?1:-1);if(requested!==before)pressKeyIcon(e.key,right?next:previous);}return;
+  }
   if(e.key!=='Tab')return;
   const focusable=[closeButton,...(mobile.matches?[]:[previous,next].filter(b=>!b.disabled)),gallery];
   const at=focusable.indexOf(document.activeElement);e.preventDefault();focusable[(at+(e.shiftKey?-1:1)+focusable.length)%focusable.length].focus({preventScroll:true});
@@ -253,6 +268,7 @@
   else if(Math.abs(dx)>=60&&Math.abs(dx)>Math.abs(dy)*1.4)navigate(dx<0?1:-1);
  },{passive:true});
  function settleMotion(){
+  clearKeyPresses();
   if(phase==='dragging'){run++;requested=index;gesture=null;settleOpen();}
   else if(phase==='opening'){run++;settleOpen();}
   else if(phase==='switching'){run++;stopMotion();render(requested);settleOpen();}

@@ -39,8 +39,8 @@
 .viewer-navigation button::after,.viewer-close::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;border-radius:inherit;background:rgb(188 188 188 / .2);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 @media(prefers-reduced-motion:no-preference){
  .viewer-navigation button::after,.viewer-close::after,.viewer-navigation button img,.viewer-close img{transform:scale(var(--icon-press-scale,1));transition:transform 160ms ease-out}
- .viewer-navigation button:not(:disabled):is(:active,[data-pressed]),.viewer-close:not(:disabled):is(:active,[data-pressed]){--icon-press-scale:.92}
- .viewer-navigation button:not(:disabled):is(:active,[data-pressed])::after,.viewer-close:not(:disabled):is(:active,[data-pressed])::after,.viewer-navigation button:not(:disabled):is(:active,[data-pressed]) img,.viewer-close:not(:disabled):is(:active,[data-pressed]) img{transition-duration:100ms}
+ .viewer-navigation button:not(:disabled):is(:active,[data-pressed],[data-key-pressed]),.viewer-close:not(:disabled):is(:active,[data-pressed],[data-key-pressed]){--icon-press-scale:.92}
+ .viewer-navigation button:not(:disabled):is(:active,[data-pressed],[data-key-pressed])::after,.viewer-close:not(:disabled):is(:active,[data-pressed],[data-key-pressed])::after,.viewer-navigation button:not(:disabled):is(:active,[data-pressed],[data-key-pressed]) img,.viewer-close:not(:disabled):is(:active,[data-pressed],[data-key-pressed]) img{transition-duration:100ms}
 }
 .viewer-navigation button:disabled{opacity:.4}
 .viewer-close{z-index:4}
