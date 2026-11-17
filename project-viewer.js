@@ -201,7 +201,9 @@
  dialog.addEventListener('pointercancel',()=>{outsideDown=false;if(gesture?.kind!=='touch')cancelDrag();});
  panel.addEventListener('lostpointercapture',()=>{if(phase==='dragging'&&gesture?.kind!=='touch'){gesture=null;finishCarousel(false);}});
  dialog.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){e.preventDefault();close();return;}
+  if(e.key==='Escape'){
+   e.preventDefault();if(phase!=='closed'&&phase!=='closing'){close();if(phase==='closing')pressKeyIcon(e.key,closeButton);}return;
+  }
   if(e.target.closest('input,textarea,select,[contenteditable="true"]')||e.metaKey||e.ctrlKey||e.altKey)return;
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){
    e.preventDefault();if(!e.repeat){const right=e.key==='ArrowRight',before=requested;navigate(right?1:-1);if(requested!==before)pressKeyIcon(e.key,right?next:previous);}return;
